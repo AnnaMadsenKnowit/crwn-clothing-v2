@@ -34,8 +34,8 @@ const removeCartItem = (cartItems, productToRemove) => {
     }
 }
 
-const removeArticle = (cartItems, articleToRemove) => {
-    return cartItems.filter(item => item.name !== articleToRemove)
+const clearCartItem = (cartItems, cartItemToClear) => {
+    return cartItems.filter(item => item.id !== cartItemToClear.id)
 }
 
 export const CartContext = createContext({
@@ -43,14 +43,17 @@ export const CartContext = createContext({
     setIsCartOpen: () => {},
     cartItems: [],
     addItemToCart: () => {},
+    removeItemFromCart: () => {},
+    clearItemFromCart: () => {},
     totalItemQuantity: 0,
-    setTotalItemQuantity: () => {},
+    totalPrice: 0
 });
 
 export const CartProvider = ({ children }) => {
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [cartItems, setCartItems] = useState([]);
     const [totalItemQuantity, setTotalItemQuantity] = useState(0);
+    const [totalPrice, setTotalPrice] = useState(0);
 
     useEffect(() => {
         const newCartCount = cartItems.reduce(
@@ -58,6 +61,14 @@ export const CartProvider = ({ children }) => {
             0
         );
         setTotalItemQuantity(newCartCount);
+    }, [cartItems]);
+
+    useEffect(() => {
+        const newCartPrice = cartItems.reduce(
+            (total, cartItem) => total + cartItem.quantity * cartItem.price, 
+            0
+        );
+        setTotalPrice(newCartPrice);
     }, [cartItems]);
 
     const addItemToCart = (productToAdd) => {
@@ -68,8 +79,8 @@ export const CartProvider = ({ children }) => {
         setCartItems(removeCartItem(cartItems, productToRemove));
     }
 
-    const removeArticleFromCart = (articleToRemove) => {
-        setCartItems(removeArticle(cartItems, articleToRemove));
+    const clearItemFromCart = (cartItemToClear) => {
+        setCartItems(clearCartItem(cartItems, cartItemToClear));
     }
 
     const value = { 
@@ -78,8 +89,9 @@ export const CartProvider = ({ children }) => {
         cartItems, 
         addItemToCart,
         removeItemFromCart,
-        removeArticleFromCart,
-        totalItemQuantity};
+        clearItemFromCart,
+        totalItemQuantity,
+        totalPrice};
 
     return (
         <CartContext.Provider value={value}>
